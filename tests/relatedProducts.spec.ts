@@ -18,4 +18,37 @@ test.describe('Related Best Seller Products Section', () => {
     expect(productUrl).toContain('/itm/');
   });
 
+  test('TC03 - Related product count matches expected backend count', async ({ page }) => {
+    const productPage = new ProductPage(page);
+    await productPage.gotoValidProduct();
+    const uiCount = await productPage.getRelatedProductCount();
+
+    // For demo: Expected count hardcoded, ideally fetched from API or fixture
+    const expectedCount = 5;
+
+    expect(uiCount).toBe(expectedCount);
+  });
+
+  test('TC04 - Each related product shows image, name, and price', async ({ page }) => {
+    const productPage = new ProductPage(page);
+    await productPage.gotoValidProduct();
+    const products = await productPage.getRelatedProducts();
+
+    for (const product of products) {
+      expect(await product.isImageVisible()).toBeTruthy();
+      expect(await product.getName()).not.toBe('');
+      expect(await product.getPrice()).not.toBe('');
+    }
+  });
+
+  test('TC05 - Related products do not include the current product', async ({ page }) => {
+    const productPage = new ProductPage(page);
+    await productPage.gotoValidProduct();
+    const currentProductId = await productPage.getCurrentProductId();
+    const relatedProductIds = await productPage.getRelatedProductIds();
+
+    expect(relatedProductIds).not.toContain(currentProductId);
+  });
+
 });
+
